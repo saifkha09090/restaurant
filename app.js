@@ -85,8 +85,23 @@ function showContent(section) {
     loadRestaurantOptions();
     loadDishes();
   } else if (section === "orders") {
-    content.innerHTML =
-      "<h1 class='text-3xl font-semibold text-cyan-400'>Orders</h1><p class='text-gray-300 mt-2'>View and manage customer orders.</p>";
+    content.innerHTML = `<h1 class='text-3xl font-semibold text-cyan-400'>Orders</h1>
+      <table class='mt-4 w-full border-collapse border border-cyan-300'>
+          <thead>
+              <tr class='bg-gray-800'>
+                  <th class='border p-2'>Image</th>
+                  <th class='border p-2'>Restaurant</th>
+                  <th class='border p-2'>Dish</th>
+                  <th class='border p-2'>Price</th>
+                  <th class='border p-2'>Status</th>
+                  <th class='border p-2'>Check</th>
+                  <th class='border p-2'>Delete</th>
+              </tr>
+          </thead>
+          <tbody id='orderList'>
+          </tbody>
+      </table>`;
+    loadOrders();
   } else if (section === "settings") {
     content.innerHTML =
       "<h1 class='text-3xl font-semibold text-cyan-400'>Settings</h1><p class='text-gray-300 mt-2'>Configure restaurant settings.</p>";
@@ -353,7 +368,6 @@ function resizeImage(file, maxWidth, maxHeight, callback) {
           let width = img.width;
           let height = img.height;
 
-          // Scale down if the image is too large
           if (width > maxWidth || height > maxHeight) {
               const scale = Math.min(maxWidth / width, maxHeight / height);
               width = width * scale;
@@ -366,345 +380,52 @@ function resizeImage(file, maxWidth, maxHeight, callback) {
           const ctx = canvas.getContext("2d");
           ctx.drawImage(img, 0, 0, width, height);
 
-          // Convert back to Base64
           const compressedBase64 = canvas.toDataURL("image/jpeg", 0.7); // 0.7 = 70% quality
           callback(compressedBase64);
       };
   };
 }
 
-// function getLocalStorage(key) {
-//   return JSON.parse(localStorage.getItem(key)) || [];
-// }
+function loadOrders() {
+  let orders = JSON.parse(localStorage.getItem("orders")) || [];
+  let orderList = document.getElementById("orderList");
 
-// function setLocalStorage(key, value) {
-//   localStorage.setItem(key, JSON.stringify(value));
-// }
+  orderList.innerHTML = "";
 
-// // Admin login functionality
-// function adminLogin() {
-//   const email = document.getElementById("email").value.trim();
-//   const password = document.getElementById("password").value.trim();
-//   const loginForm = document.getElementById("login-form");
-//   const adminPanel = document.getElementById("admin-panel");
+  orders.forEach((order, index) => {
+    let row = document.createElement("tr");
+    row.innerHTML = `
+    <td class='border py-2 px-[29px] w-[110px]'><img src="${order.image}" class="w-12 h-12 rounded-full"></td>
+      <td class='border p-2 text-center'>${order.restaurant}</td>
+      <td class='border p-2 text-center'>${order.dish}</td>
+      <td class='border p-2 text-center'>$${order.price}</td>
+      <td class='border p-2 text-center' id="status-${order.id}">${order.status}</td>
+      <td class='border p-2 text-center'>
+        <button class="px-3 py-1 bg-green-500 text-white rounded" onclick="markAsChecked(${order.id})">Check</button>
+      </td>
+      <td class='border p-2 text-center'>
+        <button class="px-3 py-1 bg-red-500 text-white rounded" onclick="deleteOrder(${index})">Delete</button>
+      </td>
+    `;
+    orderList.appendChild(row);
+  });
+}
 
-//   const admin = { email: "admin@admin.com", password: "admin" };
-//   localStorage.setItem("admin", JSON.stringify(admin));
+function markAsChecked(orderId) {
+  let orders = JSON.parse(localStorage.getItem("orders")) || [];
+  let order = orders.find(o => o.id === orderId);
+  
+  if (order) {
+    order.status = "Checked";
+    localStorage.setItem("orders", JSON.stringify(orders));
+    document.getElementById(`status-${orderId}`).innerText = "Checked";
+    Swal.fire({ title: "Order Checked!", icon: "success" });
+  }
+}
 
-//   if (email === admin.email && password === admin.password) {
-//     localStorage.setItem("loggedIn", "true");
-//     loginForm.style.display = "none";
-//     adminPanel.style.display = "flex";
-//   } else {
-//     Swal.fire({
-//       icon: "error",
-//       title: "Oops...",
-//       text: "Your email and password is incorrect!",
-//     });
-//   }
-// }
-
-// // Check login status
-// function checkLoginStatus() {
-//   const loginForm = document.getElementById("login-form");
-//   const adminPanel = document.getElementById("admin-panel");
-
-//   if (localStorage.getItem("loggedIn") === "true") {
-//     loginForm.style.display = "none";
-//     adminPanel.style.display = "flex";
-//   } else {
-//     loginForm.style.display = "flex";
-//     adminPanel.style.display = "none";
-//   }
-// }
-
-// // Logout functionality
-// function logout() {
-//   localStorage.removeItem("loggedIn");
-//   document.getElementById("login-form").style.display = "flex";
-//   document.getElementById("admin-panel").style.display = "none";
-// }
-
-// // Show content based on section
-// function showContent(section) {
-//   const content = document.getElementById("content");
-
-//   const sections = {
-//     dashboard: `
-//       <h1 class='text-3xl font-semibold text-cyan-400'>Dashboard</h1>
-//       <p class='text-gray-300 mt-2'>Overview of restaurant analytics.</p>
-//     `,
-//     restaurants: `
-//       <h1 class='text-3xl font-semibold text-cyan-400'>Manage Restaurants</h1>
-//       <button class='mt-4 px-4 py-2 bg-gradient-to-br from-purple-900 to-teal-700 text-white rounded' onclick='openModal()'>Add Restaurant</button>
-//       <table class='mt-4 w-full border-collapse border border-cyan-300'>
-//         <thead>
-//           <tr class='bg-gray-800'>
-//             <th class='border p-2'>Logo</th>
-//             <th class='border p-2'>Name</th>
-//             <th class='border p-2'>Contact</th>
-//             <th class='border p-2'>Address</th>
-//             <th class='border p-2'>Edit</th>
-//             <th class='border p-2'>Delete</th>
-//           </tr>
-//         </thead>
-//         <tbody id='restaurantList'></tbody>
-//       </table>
-//     `,
-//     dishes: `
-//       <h1 class='text-3xl font-semibold text-cyan-400'>Manage Dishes</h1>
-//       <button class='mt-4 px-4 py-2 bg-gradient-to-br from-purple-900 to-teal-700 text-white rounded' onclick='openDishModal()'>Add Dishes</button>
-//       <table class='mt-4 w-full border-collapse border border-cyan-300'>
-//         <thead>
-//           <tr class='bg-gray-800'>
-//             <th class='border p-2'>Restaurant</th>
-//             <th class='border p-2'>Name</th>
-//             <th class='border p-2'>Price</th>
-//             <th class='border p-2'>Category</th>
-//             <th class='border p-2'>Edit</th>
-//             <th class='border p-2'>Delete</th>
-//           </tr>
-//         </thead>
-//         <tbody id='dishList'></tbody>
-//       </table>
-//     `,
-//     orders: `
-//       <h1 class='text-3xl font-semibold text-cyan-400'>Orders</h1>
-//       <p class='text-gray-300 mt-2'>View and manage customer orders.</p>
-//     `,
-//     settings: `
-//       <h1 class='text-3xl font-semibold text-cyan-400'>Settings</h1>
-//       <p class='text-gray-300 mt-2'>Configure restaurant settings.</p>
-//     `,
-//   };
-
-//   content.innerHTML = sections[section] || "";
-//   if (section === "restaurants") loadRestaurants();
-//   if (section === "dishes") {
-//     loadRestaurantOptions();
-//     loadDishes();
-//   }
-// }
-
-// // Restaurant management
-// function loadRestaurants() {
-//   const restaurants = getLocalStorage("restaurants");
-//   const restaurantList = document.getElementById("restaurantList");
-
-//   restaurantList.innerHTML = restaurants
-//     .map(
-//       (restaurant) => `
-//       <tr class='bg-gray-800'>
-//         <td class='border p-2'><img src="${restaurant.logo}" class="w-12 h-12 rounded-full"></td>
-//         <td class='border p-2'>${restaurant.name}</td>
-//         <td class='border p-2'>${restaurant.phone}</td>
-//         <td class='border p-2'>${restaurant.address}</td>
-//         <td class='border p-2'><button class="bg-blue-500 text-white px-2 py-1 rounded" onclick="editRestaurant(${restaurant.id})">Edit</button></td>
-//         <td class='border p-2'><button class="bg-red-500 text-white px-2 py-1 rounded" onclick="deleteRestaurant(${restaurant.id})">Delete</button></td>
-//       </tr>
-//     `
-//     )
-//     .join("");
-// }
-
-// function addRestaurant() {
-//   const restaurants = getLocalStorage("restaurants");
-//   const id = Date.now();
-//   const name = document.getElementById("restaurantName").value.trim();
-//   const phone = document.getElementById("restaurantContact").value.trim();
-//   const address = document.getElementById("restaurantAddress").value.trim();
-//   const logoFile = document.getElementById("restaurantImg").files[0];
-
-//   if (!name || !phone || !address || !logoFile) {
-//     alert("⚠️ All fields are required.");
-//     return;
-//   }
-
-//   const phonePattern = /^[0-9]{10,11}$/;
-//   if (!phonePattern.test(phone)) {
-//     alert("⚠️ Please enter a valid phone number (10-11 digits).");
-//     return;
-//   }
-
-//   const reader = new FileReader();
-//   reader.onload = () => {
-//     const newRestaurant = {
-//       id,
-//       name,
-//       phone,
-//       address,
-//       logo: reader.result,
-//       dishes: [],
-//     };
-
-//     restaurants.push(newRestaurant);
-//     setLocalStorage("restaurants", restaurants);
-//     loadRestaurants();
-//     closeModal();
-//   };
-//   reader.readAsDataURL(logoFile);
-// }
-
-// function deleteRestaurant(id) {
-//   const restaurants = getLocalStorage("restaurants").filter((res) => res.id !== id);
-//   setLocalStorage("restaurants", restaurants);
-//   loadRestaurants();
-// }
-
-// function editRestaurant(id) {
-//   const restaurants = getLocalStorage("restaurants");
-//   const restaurant = restaurants.find((res) => res.id === id);
-
-//   if (restaurant) {
-//     const newName = prompt("Enter new name", restaurant.name);
-//     const newPhone = prompt("Enter new phone", restaurant.phone);
-//     const newAddress = prompt("Enter new address", restaurant.address);
-
-//     if (newName) restaurant.name = newName;
-//     if (newPhone) restaurant.phone = newPhone;
-//     if (newAddress) restaurant.address = newAddress;
-
-//     setLocalStorage("restaurants", restaurants);
-//     loadRestaurants();
-//   }
-// }
-
-// // Dish management
-// function loadDishes() {
-//   const restaurants = getLocalStorage("restaurants");
-//   const dishList = document.getElementById("dishList");
-
-//   dishList.innerHTML = restaurants
-//     .flatMap((restaurant) =>
-//       restaurant.dishes.map(
-//         (dish) => `
-//         <tr class='bg-gray-800'>
-//           <td class='border p-2'><img src="${dish.logo}" class="w-12 h-12 rounded-full"></td>
-//           <td class='border p-2'>${dish.name}</td>
-//           <td class='border p-2'>${dish.price}</td>
-//           <td class='border p-2'>${dish.category}</td>
-//           <td class='border p-2'><button class="bg-blue-500 text-white px-2 py-1 rounded" onclick="editDish(${restaurant.id}, ${dish.id})">Edit</button></td>
-//           <td class='border p-2'><button class="bg-red-500 text-white px-2 py-1 rounded" onclick="deleteDish(${restaurant.id}, ${dish.id})">Delete</button></td>
-//         </tr>
-//       `
-//       )
-//     )
-//     .join("");
-// }
-
-// function addDishes() {
-//   const restaurants = getLocalStorage("restaurants");
-//   const name = document.getElementById("dishName").value.trim();
-//   const restaurantId = document.getElementById("restaurantSelect").value;
-//   const price = document.getElementById("dishPrice").value.trim();
-//   // const category = document.getElementById("dishCategory").value.trim();
-//   const logoFile = document.getElementById("dishImg").files[0];
-
-//   if (!name || !restaurantId || !price || !logoFile) {
-//     alert("⚠️ All fields are required.");
-//     return;
-//   }
-
-//   if (isNaN(price) || price <= 0) {
-//     alert("⚠️ Please enter a valid price.");
-//     return;
-//   }
-
-//   const reader = new FileReader();
-//   reader.onload = () => {
-//     const newDish = {
-//       id: Date.now(),
-//       name,
-//       price: parseFloat(price),
-//       // category,
-//       logo: reader.result,
-//     };
-
-//     const restaurant = restaurants.find((res) => res.id == restaurantId);
-//     if (restaurant) {
-//       restaurant.dishes.push(newDish);
-//       setLocalStorage("restaurants", restaurants);
-//       alert("✅ Dish added successfully!");
-//       loadDishes();
-//       closeDishModal();
-//     } else {
-//       alert("⚠️ Selected restaurant not found.");
-//     }
-//   };
-//   reader.readAsDataURL(logoFile);
-// }
-
-// function deleteDish(restaurantId, dishId) {
-//   const restaurants = getLocalStorage("restaurants");
-//   const restaurant = restaurants.find((res) => res.id == restaurantId);
-
-//   if (restaurant) {
-//     restaurant.dishes = restaurant.dishes.filter((dish) => dish.id !== dishId);
-//     setLocalStorage("restaurants", restaurants);
-//     loadDishes();
-//   }
-// }
-
-// function editDish(restaurantId, dishId) {
-//   const restaurants = getLocalStorage("restaurants");
-//   const restaurant = restaurants.find((res) => res.id == restaurantId);
-
-//   if (restaurant) {
-//     const dish = restaurant.dishes.find((d) => d.id === dishId);
-//     if (dish) {
-//       const newName = prompt("Enter new dish name", dish.name);
-//       const newPrice = prompt("Enter new price", dish.price);
-//       const newCategory = prompt("Enter new category", dish.category);
-
-//       if (newName) dish.name = newName;
-//       if (newPrice && !isNaN(newPrice) && newPrice > 0) dish.price = parseFloat(newPrice);
-//       if (newCategory) dish.category = newCategory;
-
-//       setLocalStorage("restaurants", restaurants);
-//       loadDishes();
-//     }
-//   }
-// }
-
-// // Load restaurant options for the dish modal
-// function loadRestaurantOptions() {
-//   const restaurants = getLocalStorage("restaurants");
-//   const restaurantSelect = document.getElementById("restaurantSelect");
-
-//   restaurantSelect.innerHTML = "<option value=''>-- Select Restaurant --</option>";
-//   restaurants.forEach((restaurant) => {
-//     const option = document.createElement("option");
-//     option.value = restaurant.id;
-//     option.textContent = restaurant.name;
-//     restaurantSelect.appendChild(option);
-//   });
-// }
-
-// // Open and close modals
-// function openModal() {
-//   document.getElementById("restaurantModal").classList.remove("hidden");
-// }
-
-// function closeModal() {
-//   document.getElementById("restaurantModal").classList.add("hidden");
-//   document.getElementById("restaurantName").value = "";
-//   document.getElementById("restaurantContact").value = "";
-//   document.getElementById("restaurantAddress").value = "";
-//   document.getElementById("restaurantImg").value = "";
-// }
-
-// function openDishModal() {
-//   document.getElementById("dishModal").classList.remove("hidden");
-// }
-
-// function closeDishModal() {
-//   document.getElementById("dishModal").classList.add("hidden");
-//   document.getElementById("dishName").value = "";
-//   document.getElementById("dishPrice").value = "";
-//   document.getElementById("dishCategory").value = "";
-//   document.getElementById("dishImg").value = "";
-//   document.getElementById("restaurantSelect").value = "";
-// }
-
-// // Initialize
-// checkLoginStatus();
+function deleteOrder(index) {
+  let orders = JSON.parse(localStorage.getItem("orders")) || [];
+  orders.splice(index, 1);
+  localStorage.setItem("orders", JSON.stringify(orders));
+  loadOrders();
+}

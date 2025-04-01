@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SpicyHunt - Restaurant Details</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="flex flex-col min-h-screen bg-gradient-to-r from-indigo-900 to-teal-700 text-white">
     
@@ -36,32 +37,6 @@
         <p>&copy; 2025 SpicyHunt. All rights reserved.</p>
     </footer>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            let restaurant = JSON.parse(localStorage.getItem("selectedRestaurant")) || {};
-            let menuItems = restaurant.dishes || [];
-            let detailsContainer = document.getElementById("restaurant-details");
-            let menuContainer = document.getElementById("menu-list");
-
-            detailsContainer.innerHTML = `
-                <h2 class='text-4xl font-bold'>${restaurant.name}</h2>
-                <p class='text-lg text-gray-300 mt-2'>${restaurant.description || 'Enjoy delicious meals from this restaurant.'}</p>
-            `;
-
-            menuItems.forEach(item => {
-                let div = document.createElement("div");
-                div.classList.add("p-6", "bg-gray-800", "text-white", "rounded-lg", "shadow-lg", "mx-4", "text-center");
-                div.innerHTML = `
-                    <img src="${item.logo || 'https://via.placeholder.com/300'}" alt="${item.name}" class="w-full h-40 object-cover rounded-t-lg">
-                    <div class="p-4">
-                        <h3 class='text-xl font-bold mb-2'>${item.name}</h3>
-                        <p class='text-sm text-gray-300 mb-4'>${item.description || 'Delicious dish available.'}</p>
-                        <span class='text-lg font-semibold text-cyan-400'>$${item.price || '0.00'}</span>
-                    </div>
-                `;
-                menuContainer.appendChild(div);
-            });
-        });
-    </script>
+    <script src="home.js"></script>
 </body>
 </html>

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SpicyHunt - Home</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="flex flex-col min-h-screen bg-gradient-to-r from-indigo-900 to-teal-700 text-white">
     
@@ -35,41 +36,6 @@
         <p>&copy; 2025 SpicyHunt. All rights reserved.</p>
     </footer>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-        let restaurants = JSON.parse(localStorage.getItem("restaurants")) || [];
-        let restaurantContainer = document.getElementById("restaurants-list");
-        
-        restaurants.forEach(restaurant => {
-            let div = document.createElement("div");
-            div.classList.add("p-6", "bg-gray-800", "text-white", "rounded-lg", "cursor-pointer", "hover:bg-cyan-600", "transition", "shadow-lg", "mx-4");
-
-            div.innerHTML = `
-                <img src="${restaurant.logo || 'https://via.placeholder.com/300'}" alt="${restaurant.name}" class="w-full h-40 object-cover rounded-t-lg">
-                <div class="p-4 flex flex-col items-center text-center">
-                    <h3 class='text-xl font-bold mb-2'>${restaurant.name}</h3>
-                    <p class='text-sm text-gray-300 mb-4'>${restaurant.description || 'Delicious food available here.'}</p>
-                    <button class="bg-cyan-500 text-white px-4 py-2 rounded-lg hover:bg-cyan-700 transition" onclick="selectRestaurant('${restaurant.name}')">View Details</button>
-                </div>
-            `;
-
-            div.addEventListener("click", () => {
-                localStorage.setItem("selectedRestaurant", JSON.stringify(restaurant));
-                window.location.href = "restaurant.html";
-            });
-
-            restaurantContainer.appendChild(div);
-        });
-    });
-
-    function selectRestaurant(name) {
-        let restaurants = JSON.parse(localStorage.getItem("restaurants")) || [];
-        let selectedRestaurant = restaurants.find(resto => resto.name === name);
-        if (selectedRestaurant) {
-            localStorage.setItem("selectedRestaurant", JSON.stringify(selectedRestaurant));
-            window.location.href = "restaurant.html";
-        }
-    }
-    </script>
+    <script src="home.js"></script>
 </body>
 </html>
